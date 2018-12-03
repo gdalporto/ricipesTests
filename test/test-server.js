@@ -3,6 +3,8 @@ const chaiHttp = require("chai-http");
 
 const { app, runServer, closeServer } = require("../server");
 
+
+
 // this lets us use *expect* style syntax in our tests
 // so we can do things like `expect(1 + 1).to.equal(2);`
 // http://chaijs.com/api/bdd/
@@ -233,15 +235,15 @@ describe ("Test recipe command operations",function(){
       })
       .then(function(res){
         console.log(res.body,"hello");
-        expect(res.body).to.deep.equal(updateData);
-        expect(res).to.have.status(200);
-        expect(res).to.be.json;
-        expect(res.body).to.be.a("object");
-        expect(res.body).to.include("name", "ingredients", "id");
-        expect(res.body.id).to.equal(idNum);
-        expect(res.body.name).to.equal("PBJ");
-        expect(res.body.ingredients).to.equal("Peanuts");
-      });
+//        expect(res.body).to.deep.equal(updateData);
+        expect(res).to.have.status(204);
+        return chai.request(app)
+          .get("/recipes")
+      })
+      .then(function(res){
+        const recipe=res.body[0];
+        expect(recipe).to.deep.equal(updateData);
+      })
 
 
     //required name, ingredients, id

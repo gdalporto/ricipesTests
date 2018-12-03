@@ -74,8 +74,8 @@ router.put("/:id", (req, res) => {
     id: req.params.id,
     name: req.body.name,
     ingredients: req.body.ingredients
-  });
-  res.status(200).end();
+  })
+  res.status(204).end();
 });
 
 module.exports = router;
