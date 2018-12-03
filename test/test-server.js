@@ -119,6 +119,7 @@ describe("Shopping List", function() {
             .put(`/shopping-list/${updateData.id}`)
             .send(updateData);
         })
+        
         // prove that the PUT request has right status code
         // and returns updated item
         .then(function(res) {
@@ -150,3 +151,102 @@ describe("Shopping List", function() {
     );
   });
 });
+
+//--------------------------------
+
+//const chai = require('chai');
+//const chaiHttp = require ('chai-http');
+//const {app, runServer, closeServer} = require ('../server');
+//const expect = chai.expect;
+
+describe ("Test recipe command operations",function(){
+  
+  before (function() {
+    return runServer();
+  });
+
+  after (function(){
+    return closeServer();
+  });
+
+  it("should return recipe with name, id and ingredients", function(){
+    const elements = ["id", "name", "ingredients"];
+    return chai.request(app)
+      .get("/recipes")
+      .then(function(res){
+        expect(res).to.have.status(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a("array");
+        expect(res.body.length).to.be.at.least(1);
+        res.body.forEach(function(item){
+          expect(item).to.be.a("object");
+          expect(item).to.include.keys(elements);
+        });
+      });
+  });
+  it("should be able to post a recipe", function(){
+    const postParams={"name": "PBJ", "ingredients": "PeanutButter" };
+    return chai.request(app)
+      .post("/recipes")
+      .send(postParams)
+      .then(function(res){
+        expect(res).to.have.status(201);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a("object"); 
+        expect(res.body).to.include.keys("name","id","ingredients");
+        expect(res.body).to.not.equal(null);
+        expect(res.body).to.deep.equal(
+          Object.assign(postParams,{id: res.body.id })
+        );
+      })
+  });
+
+  it("should be able to delete items",function(){
+    //get item id
+    return chai.request(app)
+      .get("/recipes")
+      .then(function(res){
+        return chai.request(app)
+        .delete(`/recipes/${res.body[0].id}`)
+      })
+      .then(function(res){
+        expect(res).to.have.status(204);
+      })
+  })
+
+  it("should be able to update items", function(){
+    const updateData = {
+      name: "PBJ",
+      ingredients: "peanuts",
+      id: null
+    };
+
+    return chai.request(app)
+      .get("/recipes")
+      .then(function(res){
+        console.log(res.body[0]);
+        updateData.id = res.body[0].id;
+        console.log(updateData.id);
+        return chai.request(app)
+          .put(`/recipes/${updateData.id}`)
+          .send(updateData)
+      })
+      .then(function(res){
+        console.log(res.body,"hello");
+        expect(res.body).to.deep.equal(updateData);
+        expect(res).to.have.status(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a("object");
+        expect(res.body).to.include("name", "ingredients", "id");
+        expect(res.body.id).to.equal(idNum);
+        expect(res.body.name).to.equal("PBJ");
+        expect(res.body.ingredients).to.equal("Peanuts");
+      });
+
+
+    //required name, ingredients, id
+  })
+
+});
+
+
